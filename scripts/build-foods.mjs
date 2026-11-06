@@ -52,7 +52,7 @@ function portions(food, kind) {
     let label;
     if (kind === "S") {
       label = p.portionDescription;
-      if (!label || /not specified/i.test(label)) continue;
+      if (!label || /not specified|guideline amount/i.test(label)) continue;
     } else {
       const unit = p.measureUnit?.name;
       if (unit === "RACC") continue;

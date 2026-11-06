@@ -29,7 +29,7 @@ const categories = [...new Set(foods.map((f) => f.category))];
 const payload = {
   version: 1,
   source: "Singapore Food Insights Database (SG FoodID), Health Promotion Board",
-  terms: "https://pphtpc.hpb.gov.sg/web/sgfoodid",
+  terms: "https://go.gov.sg/termsofuse-hpbsgfoodid",
   accessed,
   fields: ["id", "name", "category", "kind", ...NUTRIENT_ORDER, "portions"],
   units: "per 100 g; sodium, cholesterol, potassium in mg; others in g; energy in kcal",

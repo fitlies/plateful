@@ -2,7 +2,7 @@ import { useEffect, useState } from "preact/hooks";
 import * as db from "../lib/db";
 import { portionLabel, scale, searchFoods } from "../lib/foods";
 import { int } from "../lib/format";
-import type { CustomFood as CF, Food, Meal, Nutrients } from "../lib/types";
+import type { CustomFood as CF, Food, Meal } from "../lib/types";
 import { Confirm, Dock, NumField, TopBar } from "../ui/common";
 import { IconTrash } from "../ui/icons";
 import { back, go } from "../ui/router";
@@ -27,12 +27,11 @@ export function CustomFood(props: { id?: string; date?: string; meal?: Meal; bar
   const [confirm, setConfirm] = useState(false);
   const [matches, setMatches] = useState<Food[]>([]);
   const [filledFrom, setFilledFrom] = useState<Food | null>(null);
-  const [extra, setExtra] = useState<Pick<Nutrients, "satFat" | "cholesterol" | "potassium"> | null>(null);
 
   // Suggest matching foods while a new food's name is typed; picking one fills in its nutrition.
   useEffect(() => {
     const q = name.trim();
-    if (props.id || q.length < 3 || filledFrom?.name === name) return setMatches([]);
+    if (props.id || q.length < 3) return setMatches([]);
     let live = true;
     const t = setTimeout(() => searchFoods(q, 5).then((r) => live && setMatches(r), () => {}), 200);
     return () => {
@@ -53,7 +52,6 @@ export function CustomFood(props: { id?: string; date?: string; meal?: Meal; bar
     setFiber(n.fiber);
     setSugar(n.sugar);
     setSodium(n.sodium);
-    setExtra({ satFat: n.satFat, cholesterol: n.cholesterol, potassium: n.potassium });
     setFilledFrom(f);
     setMatches([]);
   };
@@ -89,7 +87,7 @@ export function CustomFood(props: { id?: string; date?: string; meal?: Meal; bar
       barcode: barcode.replace(/\D/g, "") || undefined,
       servingLabel: serving.trim() || "1 serving",
       servingGrams: grams,
-      nutrients: { kcal: Math.round(kcal!), protein, carbs, fat, fiber, sugar, sodium, satFat: extra?.satFat ?? existing?.nutrients.satFat ?? null, cholesterol: extra?.cholesterol ?? existing?.nutrients.cholesterol ?? null, potassium: extra?.potassium ?? existing?.nutrients.potassium ?? null },
+      nutrients: { kcal: Math.round(kcal!), protein, carbs, fat, fiber, sugar, sodium, satFat: existing?.nutrients.satFat ?? null, cholesterol: existing?.nutrients.cholesterol ?? null, potassium: existing?.nutrients.potassium ?? null },
       createdAt: existing?.createdAt ?? new Date().toISOString(),
     };
     await db.put("customFoods", food);

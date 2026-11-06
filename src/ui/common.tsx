@@ -134,7 +134,7 @@ export function SgCredit() {
     <>
       Contains information from Singapore Food Insights Database (SG FoodID){sgInfo.accessed ? ` accessed on ${shortDate(sgInfo.accessed)} ${sgInfo.accessed.slice(0, 4)}` : ""} from
       Health Promotion Board, made available under the terms at{" "}
-      <a href="https://pphtpc.hpb.gov.sg/web/sgfoodid" target="_blank" rel="noopener noreferrer">pphtpc.hpb.gov.sg/web/sgfoodid</a>. Provided as-is;
+      <a href="https://go.gov.sg/termsofuse-hpbsgfoodid" target="_blank" rel="noopener noreferrer">go.gov.sg/termsofuse-hpbsgfoodid</a>. Provided as-is;
       nutrition data has limitations and isn't guaranteed accurate or complete.
     </>
   );

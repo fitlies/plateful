@@ -112,7 +112,9 @@ export async function searchFoods(query: string, limit = 40): Promise<Food[]> {
     }
     if (!ok) continue;
     score -= item.tokens.length * 0.12; // prefer short, generic names
-    if (item.kind === "G") score += 1; // Singapore dishes first
+    if (item.kind === "G") score += 0.4; // Singapore dishes, without beating a plain "Egg" for "eggs"
+    // The typed words in order, as whole words: "chicken rice" finds "Steamed chicken rice".
+    if (q.length > 1 && ` ${item.tokens.join(" ")} `.includes(` ${q.join(" ")} `)) score += 1.5;
     if (item.kind === "S") score += 0.4; // everyday "as eaten" dishes
     if (item.kind === "F") score += 0.3;
     if (/\b(raw|cooked|plain)\b/.test(item.lower)) score += 0.2;
@@ -140,7 +142,7 @@ export function scale(n: Nutrients, factor: number): Nutrients {
 }
 
 export function portionLabel(p: Portion): string {
-  return /\bg\b|\boz\b/.test(p.label) ? p.label : `${p.label} (${Math.round(p.grams)} g)`;
+  return /\bg\b|\boz\b|\dml\b/.test(p.label) ? p.label : `${p.label} (${Math.round(p.grams)} g)`;
 }
 
 /** How much of a food an amount means: the nutrient factor, the grams (when known) and a label. */
