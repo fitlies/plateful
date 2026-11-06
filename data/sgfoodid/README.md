@@ -5,7 +5,9 @@ Plateful's Singapore food list is built from CSV files exported from the Health 
 Its [terms](https://go.gov.sg/termsofuse-hpbsgfoodid) let you copy and redistribute the data, as long as the app shows a
 visible credit (Plateful shows it in More → About and on each Singapore food) and doesn't suggest that HPB endorses it.
 
-The site asks automated tools not to crawl it (`robots.txt`), so the exports are done by hand.
+The site asks automated tools not to crawl it (`robots.txt`). The 113 dishes here are a one-off starter set the owner asked for on
+7 Nov 2026: each was fetched with the same search and details requests the SG FoodID page makes, one request every 2 seconds, and
+saved in the single-food export layout. Add further dishes by hand export as below rather than by script.
 
 ## Add dishes
 

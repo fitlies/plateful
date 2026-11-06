@@ -1,0 +1,22 @@
+CrId,"D04020016"
+Food Name,"Milo"
+Description,"Beverage made with chocolate and malt powder mixed with hot water and condensed milk"
+Food Group,"Beverages"
+Food Subgroup,"Malted and chocolate drinks"
+Edible Portion,"100"
+Default Serving Size,"1 regular cup(s) = 250ml"
+Alternative Serving Size(s),"1 large cup(s) = 300ml"
+Source of Data,"Derived"
+Last Updated,"2026"
+
+,Per 100ml,Per Serving (250ml)
+Energy (kcal),93,233
+Protein (g),1.6,4
+Total Fat (g),2.44,6.1
+Saturated Fat (g),1.27,3.18
+Carbohydrate (g),16.32,40.8
+Sugar (g),11.16,27.9
+Dietary Fibre (g),-,-
+Sodium (mg),-,-
+Potassium (mg),157,393
+Cholesterol (mg),-,-
