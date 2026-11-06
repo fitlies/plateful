@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.data-raw/
+.DS_Store
+.claude/
+.impeccable/mocks/
+.impeccable/review/
+.impeccable/decision-direction.json
+# private research notes, not part of the app
+myfitnesspal-how-it-works.md
+.impeccable/hook.cache.json

@@ -1,0 +1,265 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-06T20:05:00+08:00",
+  "title": "Design System: Plateful",
+  "extensions": {
+    "colorMeta": {
+      "melamine-ground": {
+        "role": "neutral",
+        "displayName": "Melamine Ground",
+        "canonical": "#f3f7f5",
+        "tonalRamp": [
+          "#1f2a25",
+          "#34433c",
+          "#4d5f56",
+          "#6b7d74",
+          "#93a59c",
+          "#bccdc4",
+          "#dbe6e0",
+          "#f3f7f5"
+        ]
+      },
+      "melamine-white": {
+        "role": "neutral",
+        "displayName": "Melamine White",
+        "canonical": "#ffffff"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#13261e"
+      },
+      "kopitiam-jade": {
+        "role": "primary",
+        "displayName": "Kopitiam Jade",
+        "canonical": "#0f7b55",
+        "tonalRamp": [
+          "#0a4f37",
+          "#0f7b55",
+          "#3a9e78",
+          "#79c2a3",
+          "#a6d6c0",
+          "#d3e9de",
+          "#e4f1ea",
+          "#f3f9f6"
+        ]
+      },
+      "jade-deep": {
+        "role": "primary",
+        "displayName": "Jade Deep",
+        "canonical": "#0a4f37"
+      },
+      "cup-cobalt": {
+        "role": "secondary",
+        "displayName": "Cup Cobalt",
+        "canonical": "#2b4fa3",
+        "tonalRamp": [
+          "#14254f",
+          "#1e3878",
+          "#2b4fa3",
+          "#5170c0",
+          "#7d94d3",
+          "#a9b8e4",
+          "#d3dcf2",
+          "#e7ecf7"
+        ]
+      },
+      "roasted-kopi": {
+        "role": "tertiary",
+        "displayName": "Roasted Kopi",
+        "canonical": "#a8551a"
+      },
+      "chilli": {
+        "role": "tertiary",
+        "displayName": "Chilli",
+        "canonical": "#c4342a",
+        "tonalRamp": [
+          "#5e1611",
+          "#8f231b",
+          "#c4342a",
+          "#d9584f",
+          "#e8857e",
+          "#f2b1ac",
+          "#f8d6d3",
+          "#fbe9e7"
+        ]
+      },
+      "lacquer-black": {
+        "role": "neutral",
+        "displayName": "Lacquer Black",
+        "canonical": "#000000"
+      },
+      "night-jade-ink": {
+        "role": "primary",
+        "displayName": "Night Jade Ink",
+        "canonical": "#083a29"
+      },
+      "night-toast": {
+        "role": "primary",
+        "displayName": "Night Toast",
+        "canonical": "#0b5e41"
+      }
+    },
+    "typographyMeta": {
+      "plate-figure": {
+        "displayName": "Plate figure",
+        "purpose": "Calories left in the plate well; one per screen."
+      },
+      "figure": {
+        "displayName": "Figure",
+        "purpose": "Meal totals, ledger values and KPIs in tabular rounded numerals."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Band headings, screen titles and food names."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Entry names, form text and prose."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Field labels, section titles and captions."
+      }
+    },
+    "shadows": [
+      {
+        "name": "plate",
+        "value": "0 12px 28px rgba(10,79,55,0.2), 0 2px 5px rgba(10,79,55,0.16)",
+        "purpose": "The plate resting on the table."
+      },
+      {
+        "name": "plate-well",
+        "value": "inset 0 3px 10px rgba(19,38,30,0.12)",
+        "purpose": "The plate's eating surface."
+      },
+      {
+        "name": "log-button",
+        "value": "0 6px 16px rgba(15,123,85,0.35)",
+        "purpose": "The single floating action."
+      },
+      {
+        "name": "pop",
+        "value": "0 8px 24px rgba(19,38,30,0.18), 0 2px 6px rgba(19,38,30,0.1)",
+        "purpose": "Dialogs, toasts and chart tooltips."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-expo",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "The rim segments and macro fills grow once when food is logged (0.8s); off under reduced motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "column",
+        "value": "560px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The one primary action per screen, in the bottom dock.",
+      "html": "<button class=\"ds-btn-primary\">Log to lunch</button>",
+      "css": ".ds-btn-primary { display:inline-flex; align-items:center; justify-content:center; min-height:52px; padding:0 20px; border:0; border-radius:14px; background:#0f7b55; color:#fff; font:650 17px system-ui,-apple-system,sans-serif; } .ds-btn-primary:active { background:#0a4f37; } .ds-btn-primary:focus-visible { outline:3px solid #2b4fa3; outline-offset:2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "A quieter action beside or instead of the primary.",
+      "html": "<button class=\"ds-btn-secondary\">End fast</button>",
+      "css": ".ds-btn-secondary { min-height:52px; padding:0 20px; border:0; border-radius:14px; background:#eaf2ee; color:#0a4f37; font:650 17px system-ui,-apple-system,sans-serif; } .ds-btn-secondary:focus-visible { outline:3px solid #2b4fa3; outline-offset:2px; }"
+    },
+    {
+      "name": "Usual Chip",
+      "kind": "chip",
+      "refersTo": "chip-usual",
+      "description": "A one-tap log of a food usually eaten at this meal.",
+      "html": "<button class=\"ds-chip\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\"><path d=\"M12 5v14M5 12h14\"/></svg>Fish soup with rice</button>",
+      "css": ".ds-chip { display:inline-flex; align-items:center; gap:6px; min-height:36px; padding:6px 12px; border:0; border-radius:18px; background:#e4f1ea; color:#0a4f37; font:600 14px system-ui,-apple-system,sans-serif; } .ds-chip:active { filter:brightness(.95); } .ds-chip:focus-visible { outline:3px solid #2b4fa3; outline-offset:2px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "A numeric field with its unit inside on the right.",
+      "html": "<label class=\"ds-field\"><span>Weight now</span><div class=\"ds-unit\"><input value=\"72\" inputmode=\"decimal\"><em>kg</em></div></label>",
+      "css": ".ds-field { display:block; font:16px system-ui,-apple-system,sans-serif; } .ds-field > span { display:block; font-size:14px; font-weight:600; color:#485d53; margin-bottom:6px; } .ds-unit { position:relative; } .ds-unit input { width:100%; min-height:48px; padding:10px 48px 10px 12px; border:1px solid #dbe6e0; border-radius:10px; background:#fff; font:17px ui-rounded,system-ui,sans-serif; } .ds-unit input:focus { border-color:#0f7b55; outline:2px solid #d3e9de; } .ds-unit em { position:absolute; right:12px; top:50%; transform:translateY(-50%); font-style:normal; color:#5f7369; }"
+    },
+    {
+      "name": "Meal Band",
+      "kind": "card",
+      "refersTo": "band",
+      "description": "A flat full-width band for one meal: a dot, a title, a total and an add button.",
+      "html": "<section class=\"ds-band\"><div class=\"ds-band-head\"><i></i><b>Lunch</b><span>618</span><button aria-label=\"Add\">+</button></div><div class=\"ds-row\"><span>Chicken rice<small>Quick add · 12:30</small></span><b>607</b></div></section>",
+      "css": ".ds-band { background:#fff; border-top:1px solid #dbe6e0; border-bottom:1px solid #dbe6e0; padding:8px 16px; font:16px system-ui,-apple-system,sans-serif; color:#13261e; } .ds-band-head { display:flex; align-items:center; gap:12px; min-height:48px; } .ds-band-head i { width:20px; height:20px; border-radius:50%; border:4px solid #0f7b55; box-sizing:border-box; } .ds-band-head b { font-weight:650; font-size:17px; } .ds-band-head span { margin-left:auto; font:650 17px ui-rounded,system-ui,sans-serif; } .ds-band-head button { width:44px; height:44px; border-radius:22px; border:0; background:#e4f1ea; color:#0a4f37; font-size:22px; } .ds-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0 8px 32px; min-height:48px; } .ds-row small { display:block; font-size:13px; color:#485d53; } .ds-row b { font:600 15px ui-rounded,system-ui,sans-serif; }"
+    },
+    {
+      "name": "Tab Bar",
+      "kind": "nav",
+      "refersTo": "log-button",
+      "description": "Bottom navigation with a central round Log button.",
+      "html": "<nav class=\"ds-tabs\"><a aria-current=\"page\">Today</a><a>Progress</a><a class=\"ds-log\" aria-label=\"Log food\">+</a><a>My foods</a><a>More</a></nav>",
+      "css": ".ds-tabs { display:grid; grid-template-columns:repeat(5,1fr); align-items:center; height:72px; background:#fff; box-shadow:0 -1px 0 #dbe6e0; font:600 11px system-ui,-apple-system,sans-serif; color:#485d53; text-align:center; } .ds-tabs a[aria-current] { color:#0f7b55; } .ds-log { width:56px; height:56px; margin:-20px auto 0; border-radius:28px; display:grid; place-items:center; background:#0f7b55; color:#fff; font-size:28px; box-shadow:0 6px 16px rgba(15,123,85,.35); }"
+    },
+    {
+      "name": "Plate Gauge",
+      "kind": "custom",
+      "description": "The signature: the day's budget as a segmented plate rim.",
+      "html": "<div class=\"ds-plate\"><svg viewBox=\"0 0 236 236\" width=\"236\" height=\"236\"><circle cx=\"118\" cy=\"118\" r=\"117.5\" fill=\"#fff\"/><circle cx=\"118\" cy=\"118\" r=\"106\" fill=\"none\" stroke=\"#d3e9de\" stroke-width=\"22\"/><g transform=\"rotate(-90 118 118)\"><circle cx=\"118\" cy=\"118\" r=\"106\" fill=\"none\" stroke=\"#0a4f37\" stroke-width=\"22\" stroke-dasharray=\"190 666\"/><circle cx=\"118\" cy=\"118\" r=\"106\" fill=\"none\" stroke=\"#0f7b55\" stroke-width=\"22\" stroke-dasharray=\"100 666\" stroke-dashoffset=\"-193\"/></g></svg><div class=\"ds-well\"><b>871</b><small>kcal left today</small></div></div>",
+      "css": ".ds-plate { position:relative; width:236px; height:236px; filter:drop-shadow(0 10px 18px rgba(10,79,55,.18)); } .ds-plate svg { position:absolute; inset:0; } .ds-well { position:absolute; inset:24px; border-radius:50%; display:grid; place-content:center; text-align:center; background:radial-gradient(circle at 36% 28%, #fff 0 40%, #eaf2ee 100%); box-shadow:inset 0 3px 10px rgba(19,38,30,.12); } .ds-well b { font:700 56px/1 ui-rounded,system-ui,sans-serif; color:#0a4f37; letter-spacing:-.02em; } .ds-well small { display:block; margin-top:8px; font:600 13px system-ui,sans-serif; color:#485d53; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Kopitiam Plate",
+    "overview": "Plateful takes its look from the green-rimmed white melamine plates and floral kopi cups of Singapore coffee shops. The day is one plate. Its jade rim is the calorie budget, and it fills meal by meal. Everything else is a working tool: a calm melamine-white ground, flat full-width bands for meals, and standard controls that anyone who has used a phone knows by heart.",
+    "keyCharacteristics": [
+      "One signature gauge, the plate rim, segmented by meal with quarter ticks.",
+      "Cool melamine-white ground, never cream.",
+      "Flat full-width bands separated by hairlines, not cards.",
+      "Rounded, tabular numerals for every figure; system UI text for everything else.",
+      "State shown as material: solid when logged, dashed when still open, chilli only for the overage."
+    ],
+    "rules": [
+      {
+        "name": "The Chilli Means Past Rule",
+        "body": "Chilli appears only for an amount past a limit, and only for the part past it. A day over budget keeps its jade meals and laps the overage in chilli; nothing turns red as a verdict.",
+        "section": "colors"
+      },
+      {
+        "name": "The Validated Series Rule",
+        "body": "Chart series use the validated set (protein cobalt, carbs jade, fat roasted kopi), with a separate validated set at night. Never pick a new series colour by eye.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Numeral Sizes Rule",
+        "body": "Numerals use one voice at three main sizes: plate (56px), meal and ledger figures (17–20px), and row figures (15px). Every figure uses tabular digits so columns align.",
+        "section": "typography"
+      },
+      {
+        "name": "The Plate Sits, Bands Lie Flat Rule",
+        "body": "Only objects that would physically rest on the table cast a shadow. Lists, bands and forms never do.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do keep every figure in rounded tabular numerals, right-aligned in columns.",
+      "Do put \"usual\" foods one tap away on the meal that's due now.",
+      "Do show state as material: a solid ring when logged, a dashed ring when open, chilli only for the overage.",
+      "Do keep the jade header field full-bleed on wide screens, with content in the 560px column.",
+      "Do validate any new chart colour with the dataviz validator, in light and dark."
+    ],
+    "donts": [
+      "Don't use cream or warm paper grounds; the melamine is cool white (#f3f7f5).",
+      "Don't wrap content in floating cards or nest containers; use flat bands.",
+      "Don't turn a whole day red for going over; chilli marks only the overage.",
+      "Don't load web fonts, icon fonts or anything from a CDN; the Content Security Policy blocks it, and the brand depends on it.",
+      "Don't add eyebrow labels above headings, glyph or emoji icons, or gradient text."
+    ]
+  }
+}

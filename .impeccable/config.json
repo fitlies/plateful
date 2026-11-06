@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "ai-color-palette",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/challenger-ticket-wallet.html"
+        ],
+        "createdAt": "2026-11-06T11:21:34.518Z",
+        "reason": "Claude decided: unchosen decision-round sketch rendering the catalog world's carbon-purple ink (jet-age ticket wallet grammar); not shipped, gitignored"
+      }
+    ]
+  }
+}
