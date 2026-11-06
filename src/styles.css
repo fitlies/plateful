@@ -222,7 +222,9 @@ svg.i.sm { width: 20px; height: 20px; }
 .input-unit:has(> span) .input { padding-right: 48px; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-.grid2 > *, .grid3 > * { min-width: 0; }
+/* New food: servings, unit, weight. The unit takes the slack; the two numbers stay readable. */
+.grid-serving { display: grid; grid-template-columns: 5.5rem 1fr 7rem; gap: 12px; }
+.grid2 > *, .grid3 > *, .grid-serving > * { min-width: 0; }
 .field .seg, .page .seg { margin: 0; }
 .stepper { display: flex; align-items: stretch; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: var(--surface); }
 .stepper button { width: 48px; border: 0; background: var(--surface-2); color: var(--jade-deep); display: grid; place-items: center; }

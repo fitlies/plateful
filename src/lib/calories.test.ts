@@ -1,6 +1,6 @@
 // The numbers every diary entry is built from: amounts → nutrients, and Open Food Facts → per-100 g values.
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { amount, scale } from "./foods";
+import { amount, fraction, scale, servingLabel, servingUnit } from "./foods";
 import { lookupBarcode } from "./off";
 import type { Food } from "./types";
 
@@ -32,6 +32,31 @@ describe("amount and scale", () => {
     expect(amount(kopi, "serving", 1)).toEqual({ factor: 1, grams: 250, label: "1 cup" });
     const half = amount(kopi, "g", 125);
     expect(scale(kopi.nutrients, half.factor)).toMatchObject({ kcal: 45, fat: 1.5, sugar: null });
+  });
+});
+
+describe("New food servings", () => {
+  it("names the serving for any amount", () => {
+    expect(servingLabel(1, "plate")).toBe("1 plate");
+    expect(servingLabel(2, "plate")).toBe("2 plates");
+    expect(servingLabel(0.5, "bowl")).toBe("½ bowl");
+    expect(servingLabel(1.5, "small cup (150ml)")).toBe("1½ small cups (150ml)");
+    expect(servingLabel(3, "glass")).toBe("3 glasses");
+    expect(servingLabel(2, "slice of bread")).toBe("2 slices of bread");
+    expect(servingLabel(2, "whole")).toBe("2 whole");
+    expect(servingLabel(2, "100 g")).toBe("2 × 100 g");
+    expect(servingLabel(1, "")).toBe("1 serving");
+    expect(fraction(0.25)).toBe("¼");
+  });
+
+  it("takes the unit from a food's serving", () => {
+    expect(servingUnit("1 piece (94 g)")).toBe("piece");
+    expect(servingUnit("1 small cup (150ml)")).toBe("small cup (150ml)");
+    expect(servingUnit("100 g")).toBe("100 g");
+  });
+
+  it("rescales numbers the user hasn't filled in as blanks", () => {
+    expect(scale({ ...bread.nutrients, kcal: null, fat: null }, 2)).toMatchObject({ kcal: null, fat: null, protein: 25 });
   });
 });
 

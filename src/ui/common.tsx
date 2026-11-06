@@ -66,7 +66,7 @@ export function Stepper({ value, onChange, step = 1, min = 0, label }: { value: 
   );
 }
 
-export function NumField(props: { label: string; value: number | null; onChange: (v: number | null) => void; unit?: string; hint?: string; required?: boolean; invalid?: boolean; step?: string }) {
+export function NumField(props: { label: string; value: number | null; onChange: (v: number | null) => void; onBlur?: () => void; unit?: string; hint?: string; required?: boolean; invalid?: boolean; step?: string }) {
   return (
     <label class="field">
       <span>{props.label}</span>
@@ -80,6 +80,7 @@ export function NumField(props: { label: string; value: number | null; onChange:
             const v = parseFloat(e.currentTarget.value);
             props.onChange(Number.isFinite(v) ? v : null);
           }}
+          onBlur={props.onBlur}
         />
         {props.unit && <span>{props.unit}</span>}
       </div>

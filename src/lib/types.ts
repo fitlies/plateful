@@ -74,6 +74,8 @@ export interface CustomFood {
   barcode?: string;
   servingLabel: string;
   servingGrams: number | null;
+  servingQty?: number; // how the serving was entered: servingQty × servingUnit, e.g. 2 × "plate"
+  servingUnit?: string;
   nutrients: Nutrients; // per one serving
   createdAt: string;
 }

@@ -130,15 +130,40 @@ export async function foodByKey(key: string): Promise<Food | undefined> {
   return all.find((x) => x.food.key === key)?.food;
 }
 
-/** Nutrient totals for `grams` of a per-100 g food, or `quantity` servings of a per-serving food. */
-export function scale(n: Nutrients, factor: number): Nutrients {
+/** Nutrient totals for `grams` of a per-100 g food, or `quantity` servings of a per-serving food. Blank values stay blank. */
+export function scale<N extends Record<keyof Nutrients, number | null>>(n: N, factor: number): N {
   const out = { ...n };
   for (const k of Object.keys(out) as (keyof Nutrients)[]) {
     const v = out[k];
-    if (v != null) (out as Record<string, number | null>)[k] = Math.round(v * factor * 10) / 10;
+    if (v != null) (out as Record<string, number | null>)[k] = k === "kcal" ? Math.round(v * factor) : Math.round(v * factor * 10) / 10;
   }
-  out.kcal = Math.round(n.kcal * factor);
   return out;
+}
+
+/** Choices for how many servings a saved food is. */
+export const SERVINGS = [0.25, 0.5, 0.75, 1, 1.5, 2, 2.5, 3, 4, 5, 6, 8, 10];
+
+/** 1.5 -> "1½", 0.25 -> "¼". */
+export function fraction(q: number): string {
+  const whole = Math.floor(q);
+  const part = ({ 0.25: "¼", 0.5: "½", 0.75: "¾" } as Record<number, string>)[q - whole];
+  return part ? `${whole || ""}${part}` : dec(q);
+}
+
+/** "1 piece (94 g)" -> "piece": the unit a serving is counted in. Amounts like "100 g" stay whole. */
+export function servingUnit(label: string): string {
+  return label.replace(/\s*\([^)]*\bg\)$/, "").replace(/^1\s+(?=\D)/, "");
+}
+
+/** 2 × "plate" -> "2 plates"; 2 × "100 g" -> "2 × 100 g". */
+export function servingLabel(qty: number, unit: string): string {
+  const u = unit.trim() || "serving";
+  if (/^\d/.test(u)) return qty === 1 ? u : `${fraction(qty)} × ${u}`;
+  if (qty <= 1) return `${fraction(qty)} ${u}`;
+  // Pluralise the counted word: "small cup (150ml)" -> "small cups (150ml)", "slice of bread" -> "slices of bread".
+  return `${fraction(qty)} ${u.replace(/^([^(,]*?)([a-z]+)(?=\s*[(,]|\s+of\b|$)/i, (_, pre: string, w: string) =>
+    pre + (/^(whole|half|oz|g|kg|ml|l|lb|tbsp|tsp)$/i.test(w) || /[^s]s$/i.test(w) ? w
+      : /(ss|x|ch|sh)$/i.test(w) ? `${w}es` : /[^aeiou]y$/i.test(w) ? `${w.slice(0, -1)}ies` : `${w}s`))}`;
 }
 
 export function portionLabel(p: Portion): string {
