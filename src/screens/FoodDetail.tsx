@@ -8,6 +8,7 @@ import { addEntry, customToFood, defaultTime, saveScannedFood } from "../lib/log
 import { macroGrams, netCarbs } from "../lib/nutrition";
 import type { Entry, Food, Meal, Nutrients } from "../lib/types";
 import { MEAL_LABEL } from "../lib/types";
+import { SgCredit } from "../ui/common";
 import { Dock, MacroBar, MealPicker, Stepper, TopBar } from "../ui/common";
 import { IconTrash } from "../ui/icons";
 import { go } from "../ui/router";
@@ -19,7 +20,7 @@ interface Unit {
 }
 
 async function resolveFood(key: string): Promise<Food | undefined> {
-  if (key.startsWith("usda:")) return foodByKey(key);
+  if (key.startsWith("usda:") || key.startsWith("sg:")) return foodByKey(key);
   if (key.startsWith("custom:")) {
     const c = await db.get("customFoods", key.slice(7));
     return c ? customToFood(c) : undefined;
@@ -136,7 +137,7 @@ export function FoodDetail({ foodKey, date, meal: initialMeal, entryId, fromId, 
   const units = food ? unitsFor(food) : [];
   const goals = profile ? macroGrams(profile.kcalGoal, profile.macros) : null;
   const src =
-    food?.source === "usda" ? "USDA FoodData Central" : food?.source === "off" ? "Open Food Facts" : food?.source === "custom" ? "My food" : "";
+    food?.source === "usda" ? "USDA FoodData Central" : food?.source === "sgfoodid" ? "SG FoodID (Singapore)" : food?.source === "off" ? "Open Food Facts" : food?.source === "custom" ? "My food" : "";
 
   return (
     <>
@@ -192,6 +193,7 @@ export function FoodDetail({ foodKey, date, meal: initialMeal, entryId, fromId, 
           {n && <Facts n={n} />}
           <p class="attrib">
             {food.source === "usda" && "Nutrition from USDA FoodData Central (public domain). Values are averages."}
+            {food.source === "sgfoodid" && <SgCredit />}
             {food.source === "off" && "Nutrition from Open Food Facts, a crowd-sourced database (ODbL). Check it against the pack."}
             {food.source === "custom" && "A food you saved on this device."}
           </p>

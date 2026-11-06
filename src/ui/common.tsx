@@ -1,7 +1,8 @@
 import type { ComponentChildren } from "preact";
 import { useEffect, useRef } from "preact/hooks";
 import type { Meal } from "../lib/types";
-import { int } from "../lib/format";
+import { sgInfo } from "../lib/foods";
+import { int, shortDate } from "../lib/format";
 import { MEALS, MEAL_LABEL } from "../lib/types";
 import { IconBack, IconMinus, IconPlus } from "./icons";
 import { back } from "./router";
@@ -124,5 +125,17 @@ export function IosInstallNote() {
     <p class="warn" style="margin:16px 16px 0">
       <strong>Add Plateful to your Home Screen first</strong> (Share, then Add to Home Screen). In Safari, your iPhone can clear the diary after a week away, and the Home Screen app keeps its own separate copy.
     </p>
+  );
+}
+
+/** The notice SG FoodID's licence requires wherever its data is used. Not an endorsement by HPB. */
+export function SgCredit() {
+  return (
+    <>
+      Contains information from Singapore Food Insights Database (SG FoodID){sgInfo.accessed ? ` accessed on ${shortDate(sgInfo.accessed)} ${sgInfo.accessed.slice(0, 4)}` : ""} from
+      Health Promotion Board, made available under the terms at{" "}
+      <a href="https://pphtpc.hpb.gov.sg/web/sgfoodid" target="_blank" rel="noopener noreferrer">pphtpc.hpb.gov.sg/web/sgfoodid</a>. Provided as-is;
+      nutrition data has limitations and isn't guaranteed accurate or complete.
+    </>
   );
 }

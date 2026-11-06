@@ -4,7 +4,8 @@ import * as db from "../lib/db";
 import { int } from "../lib/format";
 import { useData } from "../lib/hooks";
 import type { Profile } from "../lib/types";
-import { Confirm } from "../ui/common";
+import { Confirm, SgCredit } from "../ui/common";
+import { loadFoods, sgInfo } from "../lib/foods";
 import { IconChevron, IconDownload, IconHourglass, IconLeaf, IconShield, IconTarget, IconTrash, IconUpload } from "../ui/icons";
 import { go } from "../ui/router";
 import { toast } from "../ui/toast";
@@ -15,6 +16,7 @@ export function More({ profile }: { profile: Profile }) {
   const [pending, setPending] = useState<File | null>(null);
   const { data: persisted } = useData(async () => (navigator.storage?.persisted ? navigator.storage.persisted() : false), []);
   const { data: count } = useData(() => db.count("entries"), []);
+  useData(() => loadFoods().catch(() => []), []); // fills sgInfo for the credit below
 
   const update = (p: Partial<Profile>) => db.saveProfile({ ...profile, ...p });
   const restore = async () => {
@@ -70,6 +72,7 @@ export function More({ profile }: { profile: Profile }) {
       <div class="page prose" style="padding-top:0">
         <p><IconShield size="sm" /> <strong>Private by design.</strong> Plateful has no account, server, analytics, ads or cookies. Your diary never leaves this device. The one exception: when you scan a barcode, that number (and nothing else) is sent to Open Food Facts to look the product up.</p>
         <p><strong>Food data.</strong> 13,402 foods from <a href="https://fdc.nal.usda.gov/" target="_blank" rel="noopener noreferrer">USDA FoodData Central</a> (public domain) ship inside the app and work offline. Barcode data comes from <a href="https://world.openfoodfacts.org/" target="_blank" rel="noopener noreferrer">Open Food Facts</a>, available under the Open Database License.</p>
+        {sgInfo.count > 0 && <p><strong>Singapore dishes.</strong> {sgInfo.count} local {sgInfo.count === 1 ? "food" : "foods"}. <SgCredit /></p>}
         <p><strong>Built with</strong> Preact (MIT) and ZXing-C++ via zxing-wasm (Apache-2.0, MIT). Nutrition estimates aren't medical advice.</p>
       </div>
 

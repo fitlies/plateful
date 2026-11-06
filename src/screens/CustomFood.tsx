@@ -1,6 +1,8 @@
 import { useEffect, useState } from "preact/hooks";
 import * as db from "../lib/db";
-import type { CustomFood as CF, Meal } from "../lib/types";
+import { portionLabel, scale, searchFoods } from "../lib/foods";
+import { int } from "../lib/format";
+import type { CustomFood as CF, Food, Meal, Nutrients } from "../lib/types";
 import { Confirm, Dock, NumField, TopBar } from "../ui/common";
 import { IconTrash } from "../ui/icons";
 import { back, go } from "../ui/router";
@@ -23,6 +25,38 @@ export function CustomFood(props: { id?: string; date?: string; meal?: Meal; bar
   const [barcode, setBarcode] = useState(props.barcode ?? "");
   const [tried, setTried] = useState(false);
   const [confirm, setConfirm] = useState(false);
+  const [matches, setMatches] = useState<Food[]>([]);
+  const [filledFrom, setFilledFrom] = useState<Food | null>(null);
+  const [extra, setExtra] = useState<Pick<Nutrients, "satFat" | "cholesterol" | "potassium"> | null>(null);
+
+  // Suggest matching foods while a new food's name is typed; picking one fills in its nutrition.
+  useEffect(() => {
+    const q = name.trim();
+    if (props.id || q.length < 3 || filledFrom?.name === name) return setMatches([]);
+    let live = true;
+    const t = setTimeout(() => searchFoods(q, 5).then((r) => live && setMatches(r), () => {}), 200);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+  }, [name]);
+
+  const fill = (f: Food) => {
+    const p = f.portions[0];
+    const n = scale(f.nutrients, p.grams / 100);
+    setServing(p.label.replace(/\s*\([^)]*\bg\)$/, ""));
+    setGrams(Math.round(p.grams));
+    setKcal(n.kcal);
+    setProtein(n.protein);
+    setCarbs(n.carbs);
+    setFat(n.fat);
+    setFiber(n.fiber);
+    setSugar(n.sugar);
+    setSodium(n.sodium);
+    setExtra({ satFat: n.satFat, cholesterol: n.cholesterol, potassium: n.potassium });
+    setFilledFrom(f);
+    setMatches([]);
+  };
 
   useEffect(() => {
     if (!props.id) return;
@@ -55,7 +89,7 @@ export function CustomFood(props: { id?: string; date?: string; meal?: Meal; bar
       barcode: barcode.replace(/\D/g, "") || undefined,
       servingLabel: serving.trim() || "1 serving",
       servingGrams: grams,
-      nutrients: { kcal: Math.round(kcal!), protein, carbs, fat, fiber, sugar, sodium, satFat: existing?.nutrients.satFat ?? null, cholesterol: existing?.nutrients.cholesterol ?? null, potassium: existing?.nutrients.potassium ?? null },
+      nutrients: { kcal: Math.round(kcal!), protein, carbs, fat, fiber, sugar, sodium, satFat: extra?.satFat ?? existing?.nutrients.satFat ?? null, cholesterol: extra?.cholesterol ?? existing?.nutrients.cholesterol ?? null, potassium: extra?.potassium ?? existing?.nutrients.potassium ?? null },
       createdAt: existing?.createdAt ?? new Date().toISOString(),
     };
     await db.put("customFoods", food);
@@ -86,6 +120,26 @@ export function CustomFood(props: { id?: string; date?: string; meal?: Meal; bar
           <input class="input" value={name} aria-invalid={tried && !name.trim() ? "true" : undefined} placeholder="e.g. Kaya toast set" onInput={(e) => setName(e.currentTarget.value)} />
         </label>
         {tried && !name.trim() && <p class="err">Give the food a name.</p>}
+        {matches.length > 0 && (
+          <div class="field" aria-live="polite">
+            <span>Fill in from a known food</span>
+            <div class="list" style="margin:0 -16px">
+              {matches.map((f) => (
+                <button type="button" class="row" key={f.key} onClick={() => fill(f)}>
+                  <span class="what">
+                    <span class="name" style="white-space:normal">{f.name}</span>
+                    <span class="sub num">{f.source === "sgfoodid" ? "Singapore · " : ""}{portionLabel(f.portions[0])} · {int(scale(f.nutrients, f.portions[0].grams / 100).kcal)} kcal</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {filledFrom && (
+          <p class="note" style="padding:0 0 16px">
+            Filled in from {filledFrom.name} ({filledFrom.source === "sgfoodid" ? "SG FoodID" : "USDA"}). Change any number to match your serving.
+          </p>
+        )}
         <label class="field">
           <span>Brand or stall</span>
           <input class="input" value={brand} placeholder="Optional" onInput={(e) => setBrand(e.currentTarget.value)} />

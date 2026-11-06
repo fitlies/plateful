@@ -2,7 +2,7 @@
 // Only same-origin files are cached. Barcode lookups (Open Food Facts) always go to the network.
 // The page registers sw.js?v=<build id>, so each deploy gets a fresh cache and the old one is deleted.
 const CACHE = `plateful-${new URL(location.href).searchParams.get("v") || "dev"}`;
-const CORE = ["./", "./index.html", "./foods.json", "./manifest.webmanifest", "./icon.svg"];
+const CORE = ["./", "./index.html", "./foods.json", "./sg-foods.json", "./manifest.webmanifest", "./icon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

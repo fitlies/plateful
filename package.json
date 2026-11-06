@@ -8,7 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "test": "vitest run",
     "preview": "vite preview",
-    "foods": "node scripts/build-foods.mjs"
+    "foods": "node scripts/build-foods.mjs",
+    "sgfoods": "node scripts/build-sg-foods.mjs"
   },
   "dependencies": {
     "barcode-detector": "^3.2.3",

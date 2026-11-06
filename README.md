@@ -28,6 +28,7 @@ Privacy here is enforced by how the app is built, not just promised.
 ## Data sources
 
 - **Food database:** [USDA FoodData Central](https://fdc.nal.usda.gov/), public domain, bundled as `public/foods.json`. It contains Foundation Foods (Oct 2026), FNDDS everyday dishes (Oct 2024) and SR Legacy (2018). To rebuild it, run `scripts/fetch-usda.sh` and then `npm run foods`.
+- **Singapore dishes:** contains information from the [Singapore Food Insights Database (SG FoodID)](https://pphtpc.hpb.gov.sg/web/sgfoodid) from the Health Promotion Board, made available under [its terms](https://go.gov.sg/termsofuse-hpbsgfoodid). It is provided as-is, with no warranty of accuracy or completeness, and its use here doesn't imply HPB endorsement. The exported files live in `data/sgfoodid/`: see the README there for how to add dishes, then run `npm run sgfoods`.
 - **Barcodes:** [Open Food Facts](https://world.openfoodfacts.org/), under the Open Database License.
 
 ## Develop

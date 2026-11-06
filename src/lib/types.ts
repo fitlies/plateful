@@ -35,7 +35,7 @@ export const NUTRIENT_KEYS = [
 
 export type Portion = { label: string; grams: number };
 
-export type FoodSource = "usda" | "off" | "custom" | "quick";
+export type FoodSource = "usda" | "sgfoodid" | "off" | "custom" | "quick";
 
 /** A food that can be logged. Nutrients are per 100 g when `per100g` is true, else per one serving. */
 export interface Food {
