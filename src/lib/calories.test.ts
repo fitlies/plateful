@@ -1,8 +1,9 @@
 // The numbers every diary entry is built from: amounts → nutrients, and Open Food Facts → per-100 g values.
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { amount, fraction, scale, servingLabel, servingUnit } from "./foods";
+import { amount, amountNutrients, fraction, scale, servingLabel, servingUnit } from "./foods";
+import { entryFood } from "./log";
 import { lookupBarcode } from "./off";
-import type { Food } from "./types";
+import type { Entry, Food } from "./types";
 
 const bread: Food = {
   key: "usda:1", source: "usda", name: "Bread, whole-wheat", per100g: true,
@@ -57,6 +58,36 @@ describe("New food servings", () => {
 
   it("rescales numbers the user hasn't filled in as blanks", () => {
     expect(scale({ ...bread.nutrients, kcal: null, fat: null }, 2)).toMatchObject({ kcal: null, fat: null, protein: 25 });
+  });
+});
+
+describe("Editing an entry's numbers", () => {
+  const typed = { kcal: 700, protein: 12.34, carbs: 90, fat: null, fiber: null, sugar: null, sodium: 1200, satFat: null, cholesterol: null, potassium: null };
+
+  it("keeps typed numbers exactly while the amount stays the same", () => {
+    // Rounding here would cut "12.34" to 12.3 while it is still being typed.
+    expect(amountNutrients(bread, 2, { factor: 2, n: typed })).toBe(typed);
+  });
+
+  it("scales typed numbers when the amount changes, and leaves blanks blank", () => {
+    const n = amountNutrients(bread, 4, { factor: 2, n: { ...typed, sodium: 1314.7 } });
+    expect(n).toMatchObject({ kcal: 1400, protein: 24.7, carbs: 180, fat: null, sodium: 2629 });
+  });
+
+  it("uses the food's numbers when nothing was typed", () => {
+    expect(amountNutrients(bread, 0.28, null).kcal).toBe(83);
+  });
+
+  it("lets an entry whose food was deleted stand in for it", () => {
+    const e: Entry = {
+      id: "e1", date: "2026-11-07", meal: "lunch", foodKey: "custom:gone", source: "custom", name: "Mee rebus",
+      amountLabel: "1 bowl (400 g)", quantity: 1, unit: "serving", grams: 400,
+      nutrients: { kcal: 560, protein: 20, carbs: 80, fat: 18, fiber: 6, sugar: 12, sodium: 2300, satFat: 6, cholesterol: null, potassium: null },
+      loggedAt: "2026-11-07T04:30:00.000Z",
+    };
+    const f = entryFood(e);
+    expect(amount(f, "serving", 1)).toEqual({ factor: 1, grams: 400, label: "1 bowl (400 g)" });
+    expect(amountNutrients(f, amount(f, "g", 200).factor, null).kcal).toBe(280);
   });
 });
 

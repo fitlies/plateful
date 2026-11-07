@@ -32,6 +32,8 @@ export const NUTRIENT_KEYS = [
   "cholesterol",
   "potassium",
 ] as const satisfies readonly (keyof Nutrients)[];
+/** Nutrients as typed into a form: any of them, calories included, can be blank. */
+export type NutrientVals = { [K in keyof Nutrients]: number | null };
 
 export type Portion = { label: string; grams: number };
 
@@ -65,6 +67,7 @@ export interface Entry {
   grams: number | null;
   nutrients: Nutrients; // totals for this entry
   loggedAt: string; // ISO time the user ate it (editable)
+  edited?: boolean; // name and numbers changed by hand, so they no longer follow the food
 }
 
 export interface CustomFood {

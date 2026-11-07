@@ -1,18 +1,17 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import * as db from "../lib/db";
-import { SERVINGS, fraction, portionLabel, scale, searchFoods, servingLabel, servingUnit } from "../lib/foods";
+import { SERVINGS, foodByKey, fraction, portionLabel, scale, searchFoods, servingLabel, servingUnit } from "../lib/foods";
 import { int } from "../lib/format";
-import type { CustomFood as CF, Food, Meal, Nutrients } from "../lib/types";
+import type { CustomFood as CF, Food, Meal, NutrientVals as Vals } from "../lib/types";
 import { Confirm, Dock, NumField, TopBar } from "../ui/common";
 import { IconTrash } from "../ui/icons";
 import { back, go } from "../ui/router";
 import { toast } from "../ui/toast";
 
-type Vals = { [K in keyof Nutrients]: number | null };
 const BLANK: Vals = { kcal: null, protein: null, carbs: null, fat: null, fiber: null, sugar: null, sodium: null, satFat: null, cholesterol: null, potassium: null };
 
 /** Create or edit one of the user's own foods (nutrition per serving, as printed on the pack). */
-export function CustomFood(props: { id?: string; date?: string; meal?: Meal; barcode?: string; name?: string; brand?: string }) {
+export function CustomFood(props: { id?: string; copyOf?: string; date?: string; meal?: Meal; barcode?: string; name?: string; brand?: string; d?: string }) {
   const [existing, setExisting] = useState<CF | null>(null);
   const [name, setName] = useState(props.name ?? "");
   const [brand, setBrand] = useState(props.brand ?? "");
@@ -56,7 +55,7 @@ export function CustomFood(props: { id?: string; date?: string; meal?: Meal; bar
   // Suggest matching foods while a new food's name is typed; picking one fills in its nutrition.
   useEffect(() => {
     const q = name.trim();
-    if (props.id || q.length < 3) return setMatches([]);
+    if (props.id || props.copyOf || q.length < 3) return setMatches([]);
     let live = true;
     const t = setTimeout(() => searchFoods(q, 5).then((r) => live && setMatches(r), () => {}), 200);
     return () => {
@@ -77,6 +76,16 @@ export function CustomFood(props: { id?: string; date?: string; meal?: Meal; bar
     setFilledFrom(f);
     setMatches([]);
   };
+
+  // "Save as my food" on a built-in food: start from its name and numbers.
+  useEffect(() => {
+    if (!props.copyOf) return;
+    foodByKey(props.copyOf).then((f) => {
+      if (!f) return;
+      setName(f.name);
+      fill(f);
+    }, () => {});
+  }, [props.copyOf]);
 
   useEffect(() => {
     if (!props.id) return;
@@ -115,7 +124,7 @@ export function CustomFood(props: { id?: string; date?: string; meal?: Meal; bar
     };
     await db.put("customFoods", food);
     if (props.date && props.meal && !existing) {
-      go("/food", { key: `custom:${food.id}`, date: props.date, meal: props.meal, d: props.barcode ? "4" : "3" });
+      go("/food", { key: `custom:${food.id}`, date: props.date, meal: props.meal, d: props.d ?? (props.barcode ? "4" : "3") });
     } else {
       toast(existing ? "Saved" : `Saved ${food.name}`);
       back("/foods");

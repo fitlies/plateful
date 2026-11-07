@@ -82,6 +82,11 @@ export function customToFood(c: CustomFood): Food {
   };
 }
 
+/** A logged entry as a food of its own, for when its food was deleted: one serving is the amount that was logged. */
+export function entryFood(e: Entry): Food {
+  return { key: e.foodKey, source: e.source, name: e.name, brand: e.brand, nutrients: e.nutrients, per100g: false, portions: [], servingLabel: e.amountLabel, servingGrams: e.grams };
+}
+
 /** Save an Open Food Facts product as one of the user's foods so the next scan works offline. */
 export async function saveScannedFood(food: Food, barcode: string): Promise<CustomFood> {
   const existing = await db.customFoodByBarcode(barcode);

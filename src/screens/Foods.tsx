@@ -3,7 +3,7 @@ import * as db from "../lib/db";
 import { tokenize } from "../lib/foods";
 import { int } from "../lib/format";
 import { useData } from "../lib/hooks";
-import { IconBarcode, IconPencil, IconSearch } from "../ui/icons";
+import { IconBarcode, IconChevron, IconPencil, IconSearch } from "../ui/icons";
 import { href } from "../ui/router";
 
 export function Foods() {
@@ -43,6 +43,7 @@ export function Foods() {
                 <span class="name">{f.name}</span>
                 <span class="sub num">{f.brand ? `${f.brand} · ` : ""}{f.servingLabel} · {int(f.nutrients.kcal)} kcal{f.barcode ? " · barcode" : ""}</span>
               </span>
+              <IconChevron size="sm" />
             </a>
           ))}
         </div>

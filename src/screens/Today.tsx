@@ -6,7 +6,7 @@ import { mealForNow, relog, usualFor } from "../lib/log";
 import { macroGrams, netCarbs, totals } from "../lib/nutrition";
 import type { Entry, Meal, Profile } from "../lib/types";
 import { MEALS, MEAL_LABEL } from "../lib/types";
-import { IconDrop, IconHourglass, IconMinus, IconNext, IconPlus, IconPrev, IconRun } from "../ui/icons";
+import { IconChevron, IconDrop, IconHourglass, IconMinus, IconNext, IconPlus, IconPrev, IconRun } from "../ui/icons";
 import { IosInstallNote, MacroBar } from "../ui/common";
 import { Plate } from "../ui/Plate";
 import { go, href } from "../ui/router";
@@ -98,6 +98,7 @@ export function Today({ date, profile }: { date: string; profile: Profile }) {
             <a class="row" key={x.id} href={href("/exercise", { date, id: x.id })} style="text-decoration:none">
               <span class="what"><span class="name">{x.name}</span><span class="sub">{x.minutes} min</span></span>
               <span class="kcal">+{int(x.kcal)}</span>
+              <IconChevron size="sm" />
             </a>
           ))}
         </section>
@@ -158,6 +159,7 @@ function MealBand(props: { meal: Meal; date: string; entries: Entry[]; target: n
             <span class="sub">{e.amountLabel} · {timeLabel(e.loggedAt)}</span>
           </span>
           <span class="kcal">{int(e.nutrients.kcal)}</span>
+          <IconChevron size="sm" />
         </a>
       ))}
       {showNext && (usual.length > 0 || yesterday.length > 0) && (

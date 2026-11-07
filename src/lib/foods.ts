@@ -1,6 +1,6 @@
 // Loads the bundled food lists (USDA, plus Singapore dishes from SG FoodID) and searches them offline.
 import { dec } from "./format";
-import type { Food, FoodSource, Nutrients, Portion } from "./types";
+import type { Food, FoodSource, NutrientVals, Nutrients, Portion } from "./types";
 
 type Row = [number | string, string, number, string, ...(number | null)[]];
 interface Payload {
@@ -130,14 +130,27 @@ export async function foodByKey(key: string): Promise<Food | undefined> {
   return all.find((x) => x.food.key === key)?.food;
 }
 
+const WHOLE = new Set<keyof Nutrients>(["kcal", "sodium", "cholesterol", "potassium"]);
+
 /** Nutrient totals for `grams` of a per-100 g food, or `quantity` servings of a per-serving food. Blank values stay blank. */
 export function scale<N extends Record<keyof Nutrients, number | null>>(n: N, factor: number): N {
   const out = { ...n };
   for (const k of Object.keys(out) as (keyof Nutrients)[]) {
     const v = out[k];
-    if (v != null) (out as Record<string, number | null>)[k] = k === "kcal" ? Math.round(v * factor) : Math.round(v * factor * 10) / 10;
+    // Calories and milligrams to whole numbers (a tenth of a mg is false precision, and it overflows narrow fields); grams to 0.1.
+    if (v != null) (out as Record<string, number | null>)[k] = WHOLE.has(k) ? Math.round(v * factor) : Math.round(v * factor * 10) / 10;
   }
   return out;
+}
+
+/** Numbers typed by hand, and the amount factor they were typed for. */
+export type OwnNumbers = { factor: number; n: NutrientVals };
+
+/** Nutrients for an amount: the food's own, or numbers typed by hand scaled from the amount they were typed for. */
+export function amountNutrients(food: Food, factor: number, own: OwnNumbers | null): NutrientVals {
+  if (!own) return scale(food.nutrients, factor);
+  const r = own.factor ? factor / own.factor : 1;
+  return r === 1 ? own.n : scale(own.n, r); // unrounded while typing, so "12.34" isn't cut to 12.3 mid-keystroke
 }
 
 /** Choices for how many servings a saved food is. */

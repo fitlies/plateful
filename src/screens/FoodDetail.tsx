@@ -1,17 +1,17 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 import * as db from "../lib/db";
-import { amount, foodByKey, portionLabel, scale } from "../lib/foods";
+import type { OwnNumbers } from "../lib/foods";
+import { amount, amountNutrients, foodByKey, portionLabel } from "../lib/foods";
 import { dec, int } from "../lib/format";
 import { finishFlow, heldFood } from "../lib/handoff";
 import { useProfile } from "../lib/hooks";
-import { addEntry, customToFood, defaultTime, saveScannedFood } from "../lib/log";
+import { addEntry, customToFood, defaultTime, entryFood, saveScannedFood } from "../lib/log";
 import { macroGrams, netCarbs } from "../lib/nutrition";
-import type { Entry, Food, Meal, Nutrients } from "../lib/types";
+import type { Entry, Food, Meal, NutrientVals } from "../lib/types";
 import { MEAL_LABEL } from "../lib/types";
-import { SgCredit } from "../ui/common";
-import { Dock, MacroBar, MealPicker, Stepper, TopBar } from "../ui/common";
+import { Dock, MacroBar, MealPicker, NumField, SgCredit, Stepper, TopBar } from "../ui/common";
 import { IconTrash } from "../ui/icons";
-import { go } from "../ui/router";
+import { go, href } from "../ui/router";
 import { toast } from "../ui/toast";
 
 interface Unit {
@@ -57,6 +57,9 @@ export function FoodDetail({ foodKey, date, meal: initialMeal, entryId, fromId, 
   const [qty, setQty] = useState(1);
   const [meal, setMeal] = useState<Meal>(initialMeal ?? "snacks");
   const [time, setTime] = useState<string>("");
+  const [name, setName] = useState("");
+  const [own, setOwn] = useState<OwnNumbers | null>(null); // numbers changed by hand, for this entry only
+  const [gone, setGone] = useState(false); // the entry's food was deleted, so the entry stands in for it
 
   useEffect(() => {
     (async () => {
@@ -69,23 +72,33 @@ export function FoodDetail({ foodKey, date, meal: initialMeal, entryId, fromId, 
         setMeal(e.meal);
         setTime(toTimeInput(e.loggedAt));
       }
-      const key = e?.foodKey ?? foodKey!;
-      const f = await resolveFood(key);
+      const found = await resolveFood(e?.foodKey ?? foodKey!);
+      const f = found ?? (e && entryFood(e));
       setFood(f ?? null);
       if (!f) return;
-      const prefill = e ?? (fromId ? await db.get("entries", fromId) : undefined);
+      setGone(!found);
+      const prefill = found && (e ?? (fromId ? await db.get("entries", fromId) : undefined));
       const units = unitsFor(f);
-      if (prefill && units.some((u) => u.id === prefill.unit)) {
-        setUnit(prefill.unit);
-        setQty(prefill.quantity);
-      } else setUnit(units[0].id);
+      const [u, q] = prefill && units.some((x) => x.id === prefill.unit) ? [prefill.unit, prefill.quantity] : [units[0].id, 1];
+      setUnit(u);
+      setQty(q);
+      setName(prefill && prefill.edited ? prefill.name : f.name);
+      if (prefill && prefill.edited) setOwn({ factor: amount(f, u, q).factor, n: prefill.nutrients });
       if (!e) setTime(toTimeInput(defaultTime(date!, initialMeal ?? "snacks")));
     })();
   }, [entryId, foodKey]);
 
   const calc = useMemo(() => (food ? amount(food, unit, Number.isFinite(qty) ? qty : 0) : null), [food, unit, qty]);
-  const n: Nutrients | null = food && calc ? scale(food.nutrients, food.per100g ? calc.factor : calc.factor) : null;
-  const valid = Number.isFinite(qty) && qty > 0;
+  const n = food && calc ? amountNutrients(food, calc.factor, own) : null;
+  const amountOk = Number.isFinite(qty) && qty > 0;
+  const kcalOk = n?.kcal != null && n.kcal >= 0;
+  const valid = amountOk && kcalOk;
+  const editNumbers = () => calc && n && setOwn({ factor: calc.factor, n });
+  const setNutrient = (k: keyof NutrientVals) => (v: number | null) => calc && n && setOwn({ factor: calc.factor, n: { ...n, [k]: v } });
+  const resetNumbers = () => {
+    setOwn(null);
+    setName(food!.name);
+  };
 
   if (food === undefined) return <TopBar title="Food" />;
   if (food === null && !entry)
@@ -97,24 +110,25 @@ export function FoodDetail({ foodKey, date, meal: initialMeal, entryId, fromId, 
     );
 
   const save = async () => {
-    if (!food || !calc || !n || !valid) return;
+    if (!food || !calc || !n || n.kcal == null || !valid) return;
     const targetDate = entry?.date ?? date!;
     let key = food.key;
-    if (food.source === "off") key = `custom:${(await saveScannedFood(food, food.key.slice(4))).id}`;
+    if (key.startsWith("off:")) key = `custom:${(await saveScannedFood(food, key.slice(4))).id}`;
     const base = entry?.loggedAt ?? defaultTime(targetDate, meal);
     const fields = {
       date: targetDate,
       meal,
       foodKey: key,
       source: food.source,
-      name: food.name,
+      name: own ? name.trim() || food.name : food.name,
       brand: food.brand,
       amountLabel: calc.label,
       quantity: qty,
       unit,
       grams: calc.grams,
-      nutrients: n,
+      nutrients: { ...n, kcal: Math.round(n.kcal) },
       loggedAt: time ? withTime(base, time) : base,
+      edited: own ? true : undefined,
     };
     if (entry) {
       await db.put("entries", { ...entry, ...fields });
@@ -146,11 +160,11 @@ export function FoodDetail({ foodKey, date, meal: initialMeal, entryId, fromId, 
         right={entry && <button class="icon-btn" aria-label="Remove entry" onClick={del} style="color:var(--chilli)"><IconTrash /></button>}
       />
       <div class="food-head">
-        <h2>{food?.name ?? entry?.name}</h2>
+        <h2>{name.trim() || food?.name}</h2>
         {food?.brand && <p style="color:var(--ink-2);margin-top:4px">{food.brand}</p>}
         <span class="src">{src}</span>
         {n && (
-          <div class="big-kcal num"><b>{int(n.kcal)}</b><span>kcal</span></div>
+          <div class="big-kcal num"><b>{n.kcal == null ? "—" : int(n.kcal)}</b><span>kcal</span></div>
         )}
         {n && goals && (
           <div class="mbars">
@@ -180,7 +194,7 @@ export function FoodDetail({ foodKey, date, meal: initialMeal, entryId, fromId, 
               </select>
             </label>
           </div>
-          {!valid && <p class="err">Enter an amount above zero.</p>}
+          {!amountOk && <p class="err">Enter an amount above zero.</p>}
           <div class="field">
             <span>Meal</span>
             <MealPicker value={meal} onChange={setMeal} />
@@ -190,17 +204,59 @@ export function FoodDetail({ foodKey, date, meal: initialMeal, entryId, fromId, 
             <input class="input num" type="time" value={time} onInput={(e) => setTime(e.currentTarget.value)} />
           </label>
 
-          {n && <Facts n={n} />}
+          {own && (
+            <label class="field" style="margin-top:8px">
+              <span>Name</span>
+              <input class="input" value={name} placeholder={food.name} onInput={(e) => setName(e.currentTarget.value)} />
+            </label>
+          )}
+          <h2 class="section-title">Nutrition for {calc?.label}</h2>
+          {own && n ? (
+            <>
+              <p class="note" style="padding:0 0 12px">Your numbers, for this entry only. Change the amount and they follow.</p>
+              <NumField label="Calories" unit="kcal" value={n.kcal} onChange={setNutrient("kcal")} required invalid={!kcalOk} step="1" />
+              {!kcalOk && <p class="err">Enter the calories.</p>}
+              <div class="grid3">
+                <NumField label="Protein" unit="g" value={n.protein} onChange={setNutrient("protein")} />
+                <NumField label="Carbs" unit="g" value={n.carbs} onChange={setNutrient("carbs")} />
+                <NumField label="Fat" unit="g" value={n.fat} onChange={setNutrient("fat")} />
+              </div>
+              <div class="grid3">
+                <NumField label="Fibre" unit="g" value={n.fiber} onChange={setNutrient("fiber")} />
+                <NumField label="Sugars" unit="g" value={n.sugar} onChange={setNutrient("sugar")} />
+                <NumField label="Sat fat" unit="g" value={n.satFat} onChange={setNutrient("satFat")} />
+              </div>
+              <div class="grid3">
+                <NumField label="Sodium" unit="mg" value={n.sodium} onChange={setNutrient("sodium")} />
+                <NumField label="Cholesterol" unit="mg" value={n.cholesterol} onChange={setNutrient("cholesterol")} />
+                <NumField label="Potassium" unit="mg" value={n.potassium} onChange={setNutrient("potassium")} />
+              </div>
+            </>
+          ) : (
+            n && <Facts n={n} />
+          )}
+          <div class="stack">
+            {own ? (
+              <button type="button" class="btn secondary" onClick={resetNumbers}>Use the original numbers</button>
+            ) : (
+              <button type="button" class="btn secondary" onClick={editNumbers}>Change the numbers</button>
+            )}
+            {!own && !gone && (food.source === "usda" || food.source === "sgfoodid") && (
+              <a class="btn secondary" href={href("/custom", { copy: food.key, date: entry ? undefined : date, meal: entry ? undefined : meal, d: entry ? undefined : String(depth + 2) })}>Save as my food</a>
+            )}
+            {!own && !gone && food.source === "custom" && (
+              <a class="btn secondary" href={href("/custom", { id: food.key.slice(7) })}>Edit my food</a>
+            )}
+          </div>
           <p class="attrib">
             {food.source === "usda" && "Nutrition from USDA FoodData Central (public domain). Values are averages."}
             {food.source === "sgfoodid" && <SgCredit />}
             {food.source === "off" && "Nutrition from Open Food Facts, a crowd-sourced database (ODbL). Check it against the pack."}
-            {food.source === "custom" && "A food you saved on this device."}
+            {food.source === "custom" && (gone ? "This food was deleted from My foods, so the entry keeps its own numbers." : "A food you saved on this device.")}
           </p>
         </div>
       )}
 
-      {!food && <p class="note" style="padding:16px">This food was deleted from My foods, so the entry can only be removed.</p>}
       {food && <Dock>
         <button class="btn" disabled={!valid} onClick={save}>{entry ? "Save changes" : `Log to ${MEAL_LABEL[meal].toLowerCase()}`}</button>
       </Dock>}
@@ -209,7 +265,7 @@ export function FoodDetail({ foodKey, date, meal: initialMeal, entryId, fromId, 
 }
 
 
-function Facts({ n }: { n: Nutrients }) {
+function Facts({ n }: { n: NutrientVals }) {
   const g = (v: number | null, unit = "g") => (v == null ? "—" : <>{dec(v)}<small>{unit}</small></>);
   return (
     <table class="facts">

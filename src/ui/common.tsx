@@ -75,6 +75,7 @@ export function NumField(props: { label: string; value: number | null; onChange:
           class="input num" type="number" inputMode="decimal" step={props.step ?? "any"} required={props.required}
           aria-label={props.unit ? `${props.label} (${props.unit})` : props.label}
           aria-invalid={props.invalid ? "true" : undefined}
+          style={props.unit ? `--unit-w:${props.unit.length}ch` : undefined}
           value={props.value ?? ""}
           onInput={(e) => {
             const v = parseFloat(e.currentTarget.value);

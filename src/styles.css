@@ -163,6 +163,10 @@ svg.i.sm { width: 20px; height: 20px; }
 .row .sub { display: block; font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row .kcal { font: 600 15px var(--num); color: var(--ink); }
 .row:active { background: var(--surface-2); }
+/* Rows that open an edit screen end in a quiet chevron. */
+.row > svg.i:last-child { color: var(--ink-3); margin-left: -6px; }
+/* Stacked secondary actions under a section, e.g. Change the numbers / Save as my food. */
+.stack { display: grid; gap: 8px; margin-top: 16px; }
 .chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 12px 32px; }
 .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 6px 12px; border-radius: 18px; border: 0; background: var(--jade-wash); color: var(--jade-deep); font-size: 14px; font-weight: 600; max-width: 100%; text-decoration: none; }
 .chip > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -219,7 +223,8 @@ svg.i.sm { width: 20px; height: 20px; }
 .input-unit { display: flex; align-items: center; gap: 8px; position: relative; }
 .input-unit .input { flex: 1; min-width: 0; }
 .input-unit > span { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--ink-3); font-size: 15px; }
-.input-unit:has(> span) .input { padding-right: 48px; }
+/* Room for the unit on the right, sized to it, so "g" fields keep space for "151.6". */
+.input-unit:has(> span) .input { padding-right: calc(var(--unit-w, 3ch) + 20px); }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 /* New food: servings, unit, weight. The unit takes the slack; the two numbers stay readable. */

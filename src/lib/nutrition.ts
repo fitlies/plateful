@@ -71,7 +71,7 @@ export function totals(entries: Entry[]) {
   return sum(entries.map((e) => e.nutrients));
 }
 
-export function netCarbs(n: Nutrients): number | null {
+export function netCarbs(n: Pick<Nutrients, "carbs" | "fiber">): number | null {
   if (n.carbs == null) return null;
   return Math.max(0, n.carbs - (n.fiber ?? 0));
 }

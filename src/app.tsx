@@ -56,7 +56,7 @@ export function App() {
     case "/entry": screen = <FoodDetail key={get("id")} entryId={get("id")} depth={1} />; break;
     case "/quick": screen = <QuickAdd key={get("id") ?? get("from") ?? "new"} date={date} meal={meal} id={get("id")} fromId={get("from")} name={get("name")} />; break;
     case "/scan": screen = <Scan date={date} meal={meal} />; break;
-    case "/custom": screen = <CustomFood key={get("id") ?? "new"} id={get("id")} date={get("date")} meal={get("meal") as Meal | undefined} barcode={get("barcode")} name={get("name")} brand={get("brand")} />; break;
+    case "/custom": screen = <CustomFood key={get("id") ?? get("copy") ?? "new"} id={get("id")} copyOf={get("copy")} d={get("d")} date={get("date")} meal={get("meal") as Meal | undefined} barcode={get("barcode")} name={get("name")} brand={get("brand")} />; break;
     case "/exercise": screen = <Exercise key={get("id") ?? "new"} date={date} id={get("id")} profile={profile} />; break;
     case "/goals": screen = <Goals profile={profile} />; break;
     case "/fasting": screen = <Fasting />; break;
