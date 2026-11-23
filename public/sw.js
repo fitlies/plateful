@@ -1,6 +1,7 @@
 // Plateful service worker: makes the app and its food database work offline.
 // Only same-origin files are cached. Barcode lookups (Open Food Facts) always go to the network.
 // The page registers sw.js?v=<build id>, so each deploy gets a fresh cache and the old one is deleted.
+// fitlies.github.io is shared with other apps (Sanfit), so this worker only ever reads and deletes plateful-* caches.
 const CACHE = `plateful-${new URL(location.href).searchParams.get("v") || "dev"}`;
 const CORE = ["./", "./index.html", "./foods.json", "./sg-foods.json", "./manifest.webmanifest", "./icon.svg"];
 
@@ -21,7 +22,7 @@ self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
       .keys()
-      .then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k))))
+      .then((keys) => Promise.all(keys.filter((k) => k.startsWith("plateful-") && k !== CACHE).map((k) => caches.delete(k))))
       .then(() => self.clients.claim()),
   );
 });
@@ -42,14 +43,14 @@ self.addEventListener("fetch", (event) => {
           }
           return res;
         })
-        .catch(() => caches.match("./index.html")),
+        .catch(() => caches.open(CACHE).then((c) => c.match("./index.html"))),
     );
     return;
   }
 
   // Everything else (hashed JS/CSS, wasm, foods.json, icons): cache first.
   event.respondWith(
-    caches.match(req).then(
+    caches.open(CACHE).then((c) => c.match(req)).then(
       (hit) =>
         hit ||
         fetch(req).then((res) => {
