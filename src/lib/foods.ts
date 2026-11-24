@@ -1,6 +1,6 @@
 // Loads the bundled food lists (USDA, plus Singapore dishes from SG FoodID) and searches them offline.
 import { dec } from "./format";
-import type { Food, FoodSource, NutrientVals, Nutrients, Portion } from "./types";
+import type { Entry, Food, FoodSource, NutrientVals, Nutrients, Portion } from "./types";
 
 type Row = [number | string, string, number, string, ...(number | null)[]];
 interface Payload {
@@ -181,6 +181,19 @@ export function servingLabel(qty: number, unit: string): string {
 
 export function portionLabel(p: Portion): string {
   return /\bg\b|\boz\b|\dml\b/.test(p.label) ? p.label : `${p.label} (${Math.round(p.grams)} g)`;
+}
+
+/**
+ * A saved entry names its portion by array position ("p2"). If the food list was rebuilt and the portions
+ * reordered, find the portion that still gives the saved grams, else fall back to plain grams.
+ */
+export function matchUnit(f: Food, e: Pick<Entry, "unit" | "quantity" | "grams">): { unit: string; quantity: number } {
+  const m = /^p(\d+)$/.exec(e.unit);
+  if (!m || e.grams == null || !f.per100g) return { unit: e.unit, quantity: e.quantity };
+  const fits = (p?: Portion) => !!p && Math.abs(p.grams * e.quantity - e.grams!) < 0.5;
+  if (fits(f.portions[Number(m[1])])) return { unit: e.unit, quantity: e.quantity };
+  const i = f.portions.findIndex(fits);
+  return i >= 0 ? { unit: `p${i}`, quantity: e.quantity } : { unit: "g", quantity: e.grams };
 }
 
 /** How much of a food an amount means: the nutrient factor, the grams (when known) and a label. */

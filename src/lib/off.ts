@@ -60,7 +60,8 @@ export async function lookupBarcode(code: string): Promise<LookupResult> {
   }
   if (res.status === 404) return { status: "not-found" };
   if (!res.ok) return { status: "error", message: `Open Food Facts answered ${res.status}. Try again in a minute.` };
-  const body = (await res.json()) as { status?: number; product?: Record<string, unknown> };
+  const body = (await res.json().catch(() => null)) as { status?: number; product?: Record<string, unknown> } | null;
+  if (!body) return { status: "error", message: "Open Food Facts sent something unreadable. Try again." };
   const p = body.product;
   if (!body.status || !p) return { status: "not-found" };
   const name = String(p.product_name_en || p.product_name || "").trim() || "Unnamed product";

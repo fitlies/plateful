@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "preact/hooks";
 import * as db from "../lib/db";
 import type { OwnNumbers } from "../lib/foods";
-import { amount, amountNutrients, foodByKey, portionLabel } from "../lib/foods";
+import { amount, amountNutrients, foodByKey, matchUnit, portionLabel } from "../lib/foods";
 import { dec, int } from "../lib/format";
 import { finishFlow, heldFood } from "../lib/handoff";
 import { useProfile } from "../lib/hooks";
@@ -79,7 +79,8 @@ export function FoodDetail({ foodKey, date, meal: initialMeal, entryId, fromId, 
       setGone(!found);
       const prefill = found && (e ?? (fromId ? await db.get("entries", fromId) : undefined));
       const units = unitsFor(f);
-      const [u, q] = prefill && units.some((x) => x.id === prefill.unit) ? [prefill.unit, prefill.quantity] : [units[0].id, 1];
+      const saved = prefill ? matchUnit(f, prefill) : null; // a rebuilt food list can reorder the portions an entry points at
+      const [u, q] = saved && units.some((x) => x.id === saved.unit) ? [saved.unit, saved.quantity] : [units[0].id, 1];
       setUnit(u);
       setQty(q);
       setName(prefill && prefill.edited ? prefill.name : f.name);

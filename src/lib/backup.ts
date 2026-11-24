@@ -17,14 +17,16 @@ export async function downloadBackup(): Promise<void> {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+export function csvCell(v: unknown): string {
+  // A leading = + - @ would run as a formula in Excel; product names come from strangers via Open Food Facts.
+  const s = v == null ? "" : String(v).replace(/^[=+\-@]/, "'$&");
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+}
+
 export async function downloadCsv(): Promise<void> {
   const { entries } = await exportAll();
   const head = ["date", "meal", "time", "food", "brand", "amount", "kcal", "protein_g", "carbs_g", "fat_g", "fiber_g", "sugar_g", "sodium_mg"];
-  const esc = (v: unknown) => {
-    // A leading = + - @ would run as a formula in Excel; product names come from strangers via Open Food Facts.
-    const s = v == null ? "" : String(v).replace(/^[=+\-@]/, "'$&");
-    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  };
+  const esc = csvCell;
   const rows = entries
     .sort((a, b) => a.loggedAt.localeCompare(b.loggedAt))
     .map((e) =>
@@ -57,6 +59,13 @@ export async function restoreBackup(file: File): Promise<{ entries: number }> {
     if (rows != null && !Array.isArray(rows)) throw new Error(`The backup's ${name} section is damaged.`);
     data[name] = (rows as unknown[]) ?? [];
   }
+  // replaceAll clears every store first, so an empty or half-empty file must not reach it.
+  if (STORE_NAMES.every((name) => !data[name]?.length)) throw new Error("That backup is empty, so nothing was changed.");
+  const isEntry = (r: unknown) => {
+    const e = r as Partial<Record<string, unknown>> | null;
+    return !!e && typeof e.id === "string" && typeof e.date === "string" && typeof e.loggedAt === "string" && !!e.nutrients && typeof e.nutrients === "object";
+  };
+  if (!(data.entries ?? []).every(isEntry)) throw new Error("The backup's entries section is damaged, so nothing was changed.");
   try {
     await replaceAll(data as never);
   } catch {
