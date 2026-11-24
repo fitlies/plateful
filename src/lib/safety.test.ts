@@ -1,17 +1,25 @@
 // The places where a mistake hurts: a bad barcode reply, a bad backup file, the calorie floor, spreadsheet formulas, saved portions.
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { csvCell, restoreBackup } from "./backup";
-import { replaceAll } from "./db";
+import { customFoodByBarcode, put, replaceAll } from "./db";
 import { matchUnit } from "./foods";
+import { saveScannedFood } from "./log";
 import { planBudget } from "./nutrition";
 import { lookupBarcode } from "./off";
 import type { Food } from "./types";
 
-vi.mock("./db", async (orig) => ({ ...(await orig<typeof import("./db")>()), replaceAll: vi.fn(async () => {}) }));
+vi.mock("./db", async (orig) => ({
+  ...(await orig<typeof import("./db")>()),
+  replaceAll: vi.fn(async () => {}),
+  put: vi.fn(async () => {}),
+  customFoodByBarcode: vi.fn(async () => undefined),
+  newId: () => "id-1",
+}));
 
 afterEach(() => {
   vi.unstubAllGlobals();
   vi.mocked(replaceAll).mockClear();
+  vi.mocked(put).mockClear();
 });
 
 describe("lookupBarcode with an unreadable reply", () => {
@@ -67,6 +75,34 @@ describe("csvCell", () => {
   it("quotes commas and quotes, and blanks null", () => {
     expect(csvCell('a,"b"')).toBe('"a,""b"""');
     expect(csvCell(null)).toBe("");
+  });
+});
+
+describe("saveScannedFood", () => {
+  const nutrients = { kcal: 250, protein: 12.34, carbs: 30, fat: 10, fiber: null, sugar: 5, sodium: 1, satFat: 3.6, cholesterol: 100, potassium: 400 };
+  const food = { key: "off:1", source: "off", name: "Snack", per100g: true, portions: [{ label: "1 pack", grams: 30 }], nutrients } as unknown as Food;
+
+  it("stores one portion's worth: grams to 0.1, calories and milligrams to whole numbers, blanks left blank", async () => {
+    const saved = await saveScannedFood(food, "8888196173208");
+    expect(saved.servingLabel).toBe("1 pack");
+    expect(saved.servingGrams).toBe(30);
+    expect(saved.nutrients).toEqual({ kcal: 75, protein: 3.7, carbs: 9, fat: 3, fiber: null, sugar: 1.5, sodium: 0, satFat: 1.1, cholesterol: 30, potassium: 120 });
+    expect(put).toHaveBeenCalledTimes(1);
+    expect(put).toHaveBeenCalledWith("customFoods", saved);
+  });
+
+  it("uses 100 g when the product has no portion", async () => {
+    const saved = await saveScannedFood({ ...food, portions: [] }, "8888196173209");
+    expect(saved.servingLabel).toBe("100 g");
+    expect(saved.servingGrams).toBe(100);
+    expect(saved.nutrients.kcal).toBe(250);
+  });
+
+  it("returns the food already saved for that barcode and writes nothing", async () => {
+    const existing = { id: "old", name: "Snack", barcode: "8888196173210" };
+    vi.mocked(customFoodByBarcode).mockResolvedValueOnce(existing as never);
+    expect(await saveScannedFood(food, "8888196173210")).toBe(existing);
+    expect(put).not.toHaveBeenCalled();
   });
 });
 

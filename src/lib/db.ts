@@ -34,7 +34,9 @@ function open(): Promise<IDBDatabase> {
       db.createObjectStore("fasting", { keyPath: "id" });
       db.createObjectStore("settings", { keyPath: "key" });
     };
+    let abandoned = false; // "blocked" rejected this open; if the other tab closes later it still succeeds, and nobody wants it
     req.onsuccess = () => {
+      if (abandoned) return req.result.close();
       // Let another tab upgrade or delete the database instead of waiting on this one forever.
       req.result.onversionchange = () => {
         req.result.close();
@@ -43,7 +45,7 @@ function open(): Promise<IDBDatabase> {
       resolve(req.result);
     };
     req.onerror = () => { dbPromise = null; reject(req.error); };
-    req.onblocked = () => { dbPromise = null; reject(new Error("Close other Plateful tabs to finish updating.")); };
+    req.onblocked = () => { abandoned = true; dbPromise = null; reject(new Error("Close other Plateful tabs to finish updating.")); };
   });
   return dbPromise;
 }
