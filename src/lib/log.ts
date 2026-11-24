@@ -1,4 +1,5 @@
 import * as db from "./db";
+import { scale } from "./foods";
 import { addDays, dayKey, parseDay } from "./format";
 import type { CustomFood, Entry, Food, Meal, Nutrients } from "./types";
 
@@ -92,13 +93,7 @@ export async function saveScannedFood(food: Food, barcode: string): Promise<Cust
   const existing = await db.customFoodByBarcode(barcode);
   if (existing) return existing;
   const p = food.portions[0] ?? { label: "100 g", grams: 100 };
-  const factor = p.grams / 100;
-  const n = { ...food.nutrients } as Nutrients;
-  for (const k of Object.keys(n) as (keyof Nutrients)[]) {
-    const v = n[k];
-    if (v != null) (n as unknown as Record<string, number>)[k] = Math.round(v * factor * 10) / 10;
-  }
-  n.kcal = Math.round(food.nutrients.kcal * factor);
+  const n = scale(food.nutrients, p.grams / 100) as Nutrients;
   const c: CustomFood = {
     id: db.newId(),
     name: food.name,

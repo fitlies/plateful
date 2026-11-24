@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "preact/hooks";
 import * as db from "./db";
+import { addDays } from "./format";
 import type { Entry, ExerciseEntry, Profile, WeightEntry } from "./types";
 
 /** Re-run `load` on mount, when deps change, and after any database write. */
@@ -44,7 +45,7 @@ export function useProfile() {
 }
 
 /** Days in a row, ending today or yesterday, with at least one food entry. */
-export async function loggingStreak(today: string, addDays: (k: string, n: number) => string): Promise<number> {
+export async function loggingStreak(today: string): Promise<number> {
   const from = addDays(today, -400);
   const entries = await db.getRange("entries", from, today);
   const days = new Set(entries.map((e) => e.date));

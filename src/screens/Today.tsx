@@ -17,7 +17,7 @@ export function Today({ date, profile }: { date: string; profile: Profile }) {
   const { data: day } = useDay(date);
   const { data: recent } = useData(() => db.recentEntries(400), []);
   const { data: yesterday } = useData(() => db.getByDate("entries", addDays(date, -1)), [date]);
-  const { data: streak } = useData(() => loggingStreak(today, addDays), [today]);
+  const { data: streak } = useData(() => loggingStreak(today), [today]);
   const { data: fast } = useData(async () => (await db.getAll("fasting")).find((f) => !f.end), []);
   const dateInput = useRef<HTMLInputElement>(null);
 

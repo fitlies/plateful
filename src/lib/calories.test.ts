@@ -66,7 +66,9 @@ describe("Editing an entry's numbers", () => {
 
   it("keeps typed numbers exactly while the amount stays the same", () => {
     // Rounding here would cut "12.34" to 12.3 while it is still being typed.
-    expect(amountNutrients(bread, 2, { factor: 2, n: typed })).toBe(typed);
+    const r = amountNutrients(bread, 2, { factor: 2, n: typed });
+    expect(r).toEqual(typed);
+    expect(r.protein).toBe(12.34);
   });
 
   it("scales typed numbers when the amount changes, and leaves blanks blank", () => {

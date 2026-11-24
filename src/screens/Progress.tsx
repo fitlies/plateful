@@ -16,7 +16,7 @@ export function Progress({ profile }: { profile: Profile }) {
       db.getAll("weights"),
       db.getRange("entries", addDays(today, -90), today),
       db.getRange("exercises", addDays(today, -6), today),
-      loggingStreak(today, addDays),
+      loggingStreak(today),
     ]);
     weights.sort((a, b) => a.date.localeCompare(b.date));
     return { weights, entries, exercises, streak };

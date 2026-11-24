@@ -36,11 +36,14 @@ function open(): Promise<IDBDatabase> {
     };
     req.onsuccess = () => {
       // Let another tab upgrade or delete the database instead of waiting on this one forever.
-      req.result.onversionchange = () => req.result.close();
+      req.result.onversionchange = () => {
+        req.result.close();
+        dbPromise = null; // the next call opens a fresh connection instead of reusing this closed one
+      };
       resolve(req.result);
     };
-    req.onerror = () => reject(req.error);
-    req.onblocked = () => reject(new Error("Close other Plateful tabs to finish updating."));
+    req.onerror = () => { dbPromise = null; reject(req.error); };
+    req.onblocked = () => { dbPromise = null; reject(new Error("Close other Plateful tabs to finish updating.")); };
   });
   return dbPromise;
 }
@@ -107,21 +110,13 @@ export async function recentEntries(limit = 300): Promise<Entry[]> {
   });
 }
 
-export async function getSetting<T>(key: string, fallback: T): Promise<T> {
-  const row = await get("settings", key);
-  return row ? (row.value as T) : fallback;
-}
-
-export async function setSetting(key: string, value: unknown): Promise<void> {
-  await put("settings", { key, value });
-}
-
+// The settings store holds one row: the profile.
 export async function getProfile(): Promise<Profile | null> {
-  return getSetting<Profile | null>("profile", null);
+  return ((await get("settings", "profile"))?.value as Profile | undefined) ?? null;
 }
 
 export async function saveProfile(p: Profile): Promise<void> {
-  await setSetting("profile", p);
+  await put("settings", { key: "profile", value: p });
 }
 
 /** Replace every store's contents (used by import). */
